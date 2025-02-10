@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import pexpect
 
 app = Flask(__name__)
+
 # Define Variables for SSH connection
 ip_address = '192.168.56.101'
 username = 'prne'
@@ -73,3 +74,4 @@ def configure_vpn():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+
