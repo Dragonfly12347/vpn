@@ -12,16 +12,16 @@ session.sendline(password)
 result = session.expect (['>', pexpect.TIMEOUT, pexpect.EOF])
 
 session.sendline('enable')
-result = session.expect(['Password:', pexpect.TIMEOUT, pexpect.EOF})
+result = session.expect(['Password:', pexpect.TIMEOUT, pexpect.EOF])
 
-session.sendline('password_enable')
-result = session.expect(['#', pexpect.TIMEOUT, pexpect.EOF})
+session.sendline(password_enable)
+result = session.expect(['#', pexpect.TIMEOUT, pexpect.EOF])
 
 session.sendline('configure terminal')
-result = session.expect([r'.\(config\)#', pexpect.TIMEOUT, pexpect.EOF})
+result = session.expect([r'.\(config\)#', pexpect.TIMEOUT, pexpect.EOF])
 
 session.sendline('hostname Haroon')
-result = session.expect([r'Haroon\(config\)#', pexpect.TIMEOUT, pexpect.EOF})
+result = session.expect([r'Haroon\(config\)#', pexpect.TIMEOUT, pexpect.EOF])
 
 session.sendline('exit')
 
