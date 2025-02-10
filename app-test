@@ -1,0 +1,75 @@
+from flask import Flask, render_template, request
+import pexpect
+
+app = Flask(__name__)
+# Define Variables for SSH connection
+ip_address = '192.168.56.101'
+username = 'prne'
+password = 'cisco123!'
+password_enable = 'class123!'
+
+def run_command(command):
+    session = pexpect.spawn('ssh ' + username + '@' + ip_address, encoding='utf-8', timeout=20)
+    session.expect('Password:')
+    session.sendline(password)
+    session.expect('>')
+    session.sendline('enable')
+    session.expect('Password:')
+    session.sendline(password_enable)
+    session.expect('#')
+    session.sendline(command)
+    session.expect('#')
+    output = session.before
+    session.sendline('exit')
+    return output
+
+@app.route('/')
+def index():
+    return '''<h1>IPSec VPN Status</h1>
+              <form action="/status" method="post">
+                <button type="submit">Check VPN Status</button>
+              </form>
+              <form action="/configure" method="post">
+                <button type="submit">Configure VPN</button>
+              </form>'''
+
+@app.route('/status', methods=['POST'])
+def status():
+    # Run the commands to check IPSec VPN status
+    isakmp_status = run_command('show crypto isakmp sa')
+    ipsec_status = run_command('show crypto ipsec sa')
+    return f'''<h1>IPSec VPN Status</h1>
+                <h3>ISAKMP Status:</h3>
+                <pre>{isakmp_status}</pre>
+                <h3>IPSec Status:</h3>
+                <pre>{ipsec_status}</pre>
+                <a href="/">Go Back</a>'''
+
+@app.route('/configure', methods=['POST'])
+def configure_vpn():
+    # Run the configuration commands to set up VPN (second script functionality)
+    session = pexpect.spawn('ssh ' + username + '@' + ip_address, encoding='utf-8', timeout=20)
+    session.expect('Password:')
+    session.sendline(password)
+    session.expect('>')
+    session.sendline('enable')
+    session.expect('Password:')
+    session.sendline(password_enable)
+    session.expect('#')
+
+    # Enter configuration mode and set up loopback interface
+    session.sendline('configure terminal')
+    session.expect(r'.\(config\)#')
+    session.sendline('interface loopback 0')
+    session.expect('#')
+    session.sendline('ip add 10.0.0.2 255.255.255.0')
+    session.expect('#')
+    session.sendline('exit')
+
+    # Display a success message
+    return '''<h1>VPN Configuration Complete</h1>
+              <p>Loopback interface has been configured successfully.</p>
+              <a href="/">Go Back</a>'''
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
